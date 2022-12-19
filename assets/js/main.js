@@ -1,40 +1,49 @@
+const pokemonList = document.getElementById('pokemonList')
+const loadMoreButton = document.getElementById('loadMoreButton')
+const limit = 10
+let offset = 0
+const maxRecords = 151
 
-function convertPokemonToLi(pokemon) {
-    return `
-        <li class="pokemon ${pokemon.type}">
-                    <span class="number">#${pokemon.number}</span>
-                    <span class="name">${pokemon.name}</span>
+function loadPokemonItems(offset, limit) {
+    pokeApi.getPokemons(offset, limit).then((pokemons = []) => {
+        const newHtml = pokemons.map((pokemon) => `
+            <li class="pokemon ${pokemon.type}">
+                <span class="number">#${pokemon.number}</span>
+                <span class="name">${pokemon.name}</span>
 
-                    <div class="detail">
-                        <ol class="types">
-                            ${pokemon.types.map((type) => `<li class="type ${type}">${type}</li>`).join('')}
-                        </ol>   
+                <div class="detail">
+                    <ol class="types">
+                        ${pokemon.types.map((type) => `<li class="type ${type}">${type}</li>`).join('')}
+                    </ol>   
 
-                        <img src="${pokemon.photo}"
-                             alt="${pokemon.name}">
-                    </div>
-                </li>
-            `
+                    <img src="${pokemon.photo}"
+                        alt="${pokemon.name}">
+                </div>
+            </li>
+        `).join('')
+
+        pokemonList.innerHTML += newHtml
+    })
 }
 
-const pokemonList = document.getElementById('pokemonList');
+loadPokemonItems(offset, limit)
 
-// requisita a url, retorna a promessa quando o fetch der certo realiza o console.log
-// interface da promisse é baseada no bloco try-catch-finally
+loadMoreButton.addEventListener('click', () => {
+    offset += limit
 
-    pokeApi.getPokemons().then((pokemons = []) => {
+    const qtdRecordNextPage = offset + limit
 
-        pokemonList.innerHTML += pokemons.map(convertPokemonToLi).join('')
+    if (qtdRecordNextPage >= maxRecords) {
+        const newLimit = maxRecords - offset
+        loadPokemonItems(offset, newLimit)
 
+        loadMoreButton.parentElement.removeChild(loadMoreButton)
+    }
+    else {
+        loadPokemonItems(offset, limit)
+    }
 
-        // const listItems = [];
+    loadPokemonItems(offset, limit)
+})
 
-        // for (let i = 0; i < pokemons.length; i++) {
-        //     const pokemon = pokemons[i];
-        //     listItems.push(convertPokemonToLi(pokemon)); 
-        // }
-
-        console.log(pokemonList);
-
-    })
 
